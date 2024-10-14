@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from encodec import EncodecModel
+from encodec.utils import convert_audio
 import torch
 import torchaudio
 
@@ -40,8 +41,12 @@ async def decode_json(request: Request):
     with torch.no_grad():
         wav = model.decode([(tensor_reshaped,None)])
 
-    wav2 = wav[0, :, :audio_length]
+    wav = wav[0, :, :audio_length]
 
-    torchaudio.save("./output.wav", wav2, sample_rate=model.sample_rate, encoding='PCM_S', bits_per_sample=16)
+    target_sr = 22050
+
+    wav = convert_audio(wav, model.sample_rate,target_sr , model.channels)
+
+    torchaudio.save("./output.wav", wav, sample_rate=target_sr, encoding='PCM_S', bits_per_sample=16)
 
     return {"message": "JSON received", "data": json_payload}

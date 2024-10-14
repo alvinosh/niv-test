@@ -34,7 +34,7 @@ class EncodecDecodeModel(nn.Module):
         return self.model.decode(encoded_frames)
 
 
-wav, sr = torchaudio.load("../test.wav")
+wav, sr = torchaudio.load("../StarWars60.wav")
 
 model = EncodecModel.encodec_model_24khz()
 encodec_model = EncodecEncodeModel(model)   
@@ -54,16 +54,18 @@ print(f"Encodec Model: {frames}")
 print(f"Decodec Model: {audio_values}")
 
 # export the models to unnx format
-# onnx_model_encode_program = torch.onnx.export(
-#     encodec_model, 
-#     wav, 
-#     "../client/public/encodec.onnx", 
-#     opset_version=11,
-#     input_names=['audio'], 
-#     output_names=['encoded_frames'],
-#     dynamic_axes={
-#         'audio': {2: 'audio_length'}
-#     }
-# )
+onnx_model_encode_program = torch.onnx.export(
+    encodec_model, 
+    wav, 
+    "../client/public/encodec.onnx", 
+    opset_version=11,
+    input_names=['audio'], 
+    output_names=['encoded_frames'],
+    dynamic_axes={
+        'audio': {2: 'audio_length'},
+        'encoded_frames': {0: 'batch', 2: 'length'}
+    }
 
-# onnx_model_decode_program = torch.onnx.export(decodec_model, frames, "../client/public/decodec.onnx")
+)
+
+onnx_model_decode_program = torch.onnx.export(decodec_model, frames, "../client/public/decodec.onnx")

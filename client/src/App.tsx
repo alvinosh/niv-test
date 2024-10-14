@@ -38,6 +38,8 @@ async function EncodeAudio(ffmpeg: FFmpeg, arrayBuffer: ArrayBuffer) {
   const dims = output['encoded_frames'].dims;
   const size = output['encoded_frames'].size;
 
+
+
   const jsonPayload = {
     'data': Array.from(array).map((x) => Number(x)),
     'dims': dims,
